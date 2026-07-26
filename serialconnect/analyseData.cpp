@@ -12,14 +12,14 @@
 
 #define debug
 
-//#define debug_lane_pointer
+// #define debug_lane_pointer
 
 #define COLORADO_CHANNELS 32
 #define COLORADO_ADDRESS_WORD_MASK 0x80
 #define COLORADO_ROWS 16
 
 #define DISPLAY_LANE_COUNT 10
-#define BUFFER_LENGTH 10
+#define BUFFER_LENGTH 24
 
 #define MQTT_MESSAGE_LENGTH 16
 // for the message to broker
@@ -28,9 +28,13 @@
 uint8_t osm6_start_detected;
 uint8_t osm6_end_detected;
 uint8_t buf[BUFFER_LENGTH];
+uint8_t paket1[BUFFER_LENGTH];
+uint8_t paket2[BUFFER_LENGTH];
+uint8_t part1_exist;
+uint8_t part2_exist;
 uint8_t colorado_control_update;
 uint8_t **colorado_data;
-//uint8_t colorado_data[COLORADO_CHANNELS][COLORADO_ROWS];
+
 uint8_t colorado_control_channel;
 uint8_t colorado_control_bit;
 uint8_t in_count;
@@ -45,6 +49,7 @@ uint8_t colorado_digit_no;
 #define EOT 0x04
 
 #define verbose true
+#define debug
 
 const uint8_t colorado_channel_length[COLORADO_CHANNELS] = {7, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 0, 9, 0, 9, 9, 0, 9, 9, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 int loop;
@@ -55,7 +60,7 @@ int initReadData()
 
     int i, o, ncolumns = 2, nrows = 3;
 
-    //only way to alloc 2 dimensonal
+    // only way to alloc 2 dimensonal
 
     colorado_data = (uint8_t **)malloc(sizeof(uint8_t *) * 32);
     for (i = 0; i < 32; i++)
@@ -95,34 +100,75 @@ int putReadData(uint8_t ReadData)
 {
     uint8_t j;
 
-    if (ReadData == SOH) 
-    {      
-        //wir starten neu mit sammeln
+    if (ReadData == SOH)
+    {
+        // wir starten neu mit sammeln
         in_count = 1;
         osm6_start_detected = 0x01;
         osm6_end_detected = 0x00;
         buf[0] = ReadData;
         // colorado_control_bit = buf[0] & 0x01;
         // colorado_control_channel = (~(buf[0] >> 1)) & 0x1F;
-    } else if (ReadData == EOT)
+    }
+    else if (ReadData == EOT)
     {
         osm6_end_detected = 0x01;
-        if (verbose)
+        buf[in_count] = ReadData;
+
+        if (buf[1] == STX && buf[2] == HOME && buf[3] == LF)
         {
-            printf("\n");
-            printf("analyseData - EOT detected - process data \n");
+            if (part1_exist == 1)
+            {
+                part2_exist = 1;
+                memcpy(paket2, &buf[0], in_count);
+            }
+
+            if (verbose)
+            {
+                printf("\n");
+                printf("analyseData - Paket 2 \n");
+            }
         }
-        //wir haben genug und verarbeiten
-        
-        //please check number lanes in colorado config !!!!!!!!!
-        // analyseActiveData(colorado_control_channel, &colorado_data[colorado_control_channel]);
+        else if (buf[1] == STX && buf[2] == HOME)
+        {
+            part1_exist = 1;
+            part2_exist = 0;
+            memcpy(paket1, &buf[0], in_count);
+            if (verbose)
+            {
+                printf("\n");
+                printf("analyseData - Paket 1 \n");
+            }
+        }
+        else
+        {
+            if (verbose)
+            {
+                printf("\n");
+                printf("analyseData - Error \n");
+            }
+        }
+
+        if (part2_exist == 1)
+        {
+            if (verbose)
+            {
+                printf("\n");
+                printf("analyseData - Paket 1 + Paket 2 \n");
+            }
+        }
+
+        // wir haben genug und verarbeiten
+
+        // please check number lanes in colorado config !!!!!!!!!
+        //  analyseActiveData(colorado_control_channel, &colorado_data[colorado_control_channel]);
         // checkStartStop(&colorado_data[colorado_control_channel]);
 
         // wir analsieren die zeit um unötiges schicken zu vermeiden
         // getTime(&colorado_data[colorado_control_channel]);
 
-        // 
-        // getHeader(&colorado_data[colorado_control_channel]);
+        //
+        getHeader(&colorado_data[colorado_control_channel]);
 
         // storeRounds(&colorado_data[colorado_control_channel]);
     }
