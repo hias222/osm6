@@ -4,7 +4,7 @@
 #include <termios.h>
 #include <stdio.h>
 
-#define COLORADO_ADDRESS_WORD_MASK 0x80
+#define OSM6_ADDRESS_WORD_MASK 0x01
 #define COLORADO_ERROR_CR 0x35
 #define BUFFER_LENGTH 32
 
@@ -236,7 +236,7 @@ int read(char *portname, char *dstname, bool forward, volatile int *running, boo
         for (int i = 0; i < res; i++)
         {
 
-            if ((buf[i] & COLORADO_ADDRESS_WORD_MASK) == COLORADO_ADDRESS_WORD_MASK)
+            if ((buf[i] & OSM6_ADDRESS_WORD_MASK) == OSM6_ADDRESS_WORD_MASK)
             {
                 if (verbose)
                 {

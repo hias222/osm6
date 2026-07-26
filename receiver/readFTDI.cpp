@@ -23,7 +23,14 @@
 
 #include "analyseData.h"
 
-#define COLORADO_ADDRESS_WORD_MASK 0x80
+#define OSM6_ADDRESS_WORD_MASK 0x01
+#define SOH 0x01
+#define STX 0x02
+#define HOME 0x08
+#define LF 0x0A
+#define DC2 0x12
+#define DC4 0x14
+#define EOT 0x04
 #define BUF_SIZE 0x10
 
 #define MAX_DEVICES 5
@@ -33,16 +40,46 @@ static volatile int keepRunning;
 static void dumpBuffer(unsigned char *buffer, int elements, bool verbose)
 {
 	int j;
+	
+
 	for (j = 0; j < elements; j++)
 	{
 		if (verbose)
 		{
-			if ((buffer[j] & COLORADO_ADDRESS_WORD_MASK) == COLORADO_ADDRESS_WORD_MASK)
+			if (buffer[j] == SOH) 
 			{
 				printf("\n");
 			}
-			printf("0x%02X ", buffer[j]);
+
+			switch (buffer[j])
+			{
+				case SOH:
+					printf("SOH ");
+					break;
+				case STX:
+					printf("STX ");
+					break;
+				case EOT:
+					printf("EOT ");
+					break;
+				case HOME:
+					printf("HOME ");
+					break;
+				case LF:
+					printf("LF ");
+					break;
+				case DC2:
+					printf("DC2 ");
+					break;
+				case DC4:
+					printf("DC4 ");
+					break;
+				default:
+					printf("0x%02X ", buffer[j]);
+			}
+
 		}
+
 		putReadData(buffer[j]);
 	}
 }
@@ -52,7 +89,7 @@ static void dumpToFile(unsigned char *buffer, int elements, FILE *filename)
 	int j;
 	for (j = 0; j < elements; j++)
 	{
-		fprintf(filename,"%02X", buffer[j]);
+		fprintf(filename, "%02X", buffer[j]);
 	}
 }
 
@@ -112,7 +149,7 @@ int openFtdiHanlde(int numberDevice, FT_HANDLE *prepareHandle)
 	}
 
 	ftStatus = FT_SetDataCharacteristics(*prepareHandle,
-										 FT_BITS_8,
+										 FT_BITS_7,
 										 FT_STOP_BITS_1,
 										 FT_PARITY_EVEN);
 

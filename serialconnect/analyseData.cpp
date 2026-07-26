@@ -25,7 +25,8 @@
 // for the message to broker
 #define MQTT_LONG_LENGTH 25
 
-uint8_t colorado_start_detected;
+uint8_t osm6_start_detected;
+uint8_t osm6_end_detected;
 uint8_t buf[BUFFER_LENGTH];
 uint8_t colorado_control_update;
 uint8_t **colorado_data;
@@ -34,6 +35,16 @@ uint8_t colorado_control_channel;
 uint8_t colorado_control_bit;
 uint8_t in_count;
 uint8_t colorado_digit_no;
+
+#define SOH 0x01
+#define STX 0x02
+#define HOME 0x08
+#define LF 0x0A
+#define DC2 0x12
+#define DC4 0x14
+#define EOT 0x04
+
+#define verbose true
 
 const uint8_t colorado_channel_length[COLORADO_CHANNELS] = {7, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 0, 9, 0, 9, 9, 0, 9, 9, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 int loop;
@@ -84,68 +95,47 @@ int putReadData(uint8_t ReadData)
 {
     uint8_t j;
 
-    if ((ReadData & COLORADO_ADDRESS_WORD_MASK) == COLORADO_ADDRESS_WORD_MASK)
-    {
-        if (0x01 == colorado_start_detected)
-        {
-            //wir haben genug und verarbeiten
-            if (in_count == colorado_channel_length[colorado_control_channel])
-            {
-
-                for (j = 1; j < colorado_channel_length[colorado_control_channel]; j++)
-                {
-                    colorado_digit_no = (buf[j] >> 4) & 0x07;
-                    colorado_data[colorado_control_channel][(colorado_digit_no << 1) + colorado_control_bit] = (~buf[j]) & 0x0F;
-                }
-
-                if (colorado_control_channel != 0x00 && colorado_control_channel < (DISPLAY_LANE_COUNT + 1))
-                {
-
-#ifdef debug_lane_pointer
-                    showDisplayLine(&colorado_data[colorado_control_channel]);
-#endif
-                    //please check number lanes in colorado config !!!!!!!!!
-                    analyseActiveData(colorado_control_channel, &colorado_data[colorado_control_channel]);
-                }
-                else if (colorado_control_channel == 0x00)
-                {
-                    checkStartStop(&colorado_data[colorado_control_channel]);
-                    // wir analsieren die zeit um unötiges schicken zu vermeiden
-                    getTime(&colorado_data[colorado_control_channel]);
-                }
-                else if (colorado_control_channel == 0x0c)
-                {
-#ifdef debug_header
-                    // https://www.coloradotime.com/manuals/System_6_Swimming_Manual_F890.pdf
-                    //0c
-                    // 0c oder 0a
-                    // A600102E304050607D
-                    //outPutBuffer(colorado_control_channel, buf);
-#endif
-                    getHeader(&colorado_data[colorado_control_channel]);
-                }
-                else if (colorado_control_channel == 0x12)
-                {
-                    storeRounds(&colorado_data[colorado_control_channel]);
-                }
-            }
-        }
+    if (ReadData == SOH) 
+    {      
         //wir starten neu mit sammeln
         in_count = 1;
-        colorado_start_detected = 0x01;
+        osm6_start_detected = 0x01;
+        osm6_end_detected = 0x00;
         buf[0] = ReadData;
-        colorado_control_bit = buf[0] & 0x01;
-        colorado_control_channel = (~(buf[0] >> 1)) & 0x1F;
+        // colorado_control_bit = buf[0] & 0x01;
+        // colorado_control_channel = (~(buf[0] >> 1)) & 0x1F;
+    } else if (ReadData == EOT)
+    {
+        osm6_end_detected = 0x01;
+        if (verbose)
+        {
+            printf("\n");
+            printf("analyseData - EOT detected - process data \n");
+        }
+        //wir haben genug und verarbeiten
+        
+        //please check number lanes in colorado config !!!!!!!!!
+        // analyseActiveData(colorado_control_channel, &colorado_data[colorado_control_channel]);
+        // checkStartStop(&colorado_data[colorado_control_channel]);
+
+        // wir analsieren die zeit um unötiges schicken zu vermeiden
+        // getTime(&colorado_data[colorado_control_channel]);
+
+        // 
+        // getHeader(&colorado_data[colorado_control_channel]);
+
+        // storeRounds(&colorado_data[colorado_control_channel]);
     }
     else
     {
-        if (0x01 == colorado_start_detected)
-        { // wir hatten ein Adress Word erkannt => Daten speichern
+        if (0x01 == osm6_start_detected)
+        { // wir hatten ein Start erkannt => Daten speichern
             buf[in_count] = ReadData;
             in_count++;
-            if (in_count > 9)
+            if (in_count > 24)
             { // Ups... Da ist was schief gelaufen. Mehr als 8 Bytes bis zum nächsten Adress Word
-                colorado_start_detected = 0x00;
+                osm6_start_detected = 0x00;
+                osm6_end_detected = 0x00;
             }
         }
     }
