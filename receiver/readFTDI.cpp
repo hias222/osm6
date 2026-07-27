@@ -60,7 +60,7 @@ static void dumpBuffer(unsigned char *buffer, int elements, bool verbose)
 					printf("STX ");
 					break;
 				case EOT:
-					printf("EOT ");
+					printf("EOT\n");
 					break;
 				case HOME:
 					printf("HOME ");

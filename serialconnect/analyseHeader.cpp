@@ -8,7 +8,7 @@
 #include "analyseLane.h"
 #include "analyseRunningTime.h"
 
-#define debug
+// #define debug
 
 char *COLORADO_HEADER_DATA;
 

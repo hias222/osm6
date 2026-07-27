@@ -10,7 +10,7 @@
 #include "analyseRunningTime.h"
 #include "analyseLane.h"
 
-#define debug
+// #define debug
 
 // #define debug_lane_pointer
 
@@ -47,9 +47,6 @@ uint8_t colorado_digit_no;
 #define DC2 0x12
 #define DC4 0x14
 #define EOT 0x04
-
-#define verbose true
-#define debug
 
 const uint8_t colorado_channel_length[COLORADO_CHANNELS] = {7, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 0, 9, 0, 9, 9, 0, 9, 9, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 int loop;
@@ -123,11 +120,10 @@ int putReadData(uint8_t ReadData)
                 memcpy(paket2, &buf[0], in_count);
             }
 
-            if (verbose)
-            {
-                printf("\n");
-                printf("analyseData - Paket 2 \n");
-            }
+#ifdef debug
+            printf("analyseData - Paket 2 \n");
+#endif
+
         }
         else if (buf[1] == STX && buf[2] == HOME)
         {
@@ -137,29 +133,26 @@ int putReadData(uint8_t ReadData)
 
             getHeader(paket1);
 
-            if (verbose)
-            {
-                printf("\n");
-                printf("analyseData - Paket 1 \n");
-            }
+#ifdef debug
+            printf("analyseData - Paket 1 \n");
+#endif
         }
         else
         {
-            if (verbose)
-            {
-                printf("\n");
-                printf("analyseData - Error \n");
-            }
+
+            printf("todo - ping \n");
+
+#ifdef debug
+            printf("analyseData - Error \n");
+#endif
         }
 
+#ifdef debug
         if (part2_exist == 1)
         {
-            if (verbose)
-            {
-                printf("\n");
-                printf("analyseData - Paket 1 + Paket 2 \n");
-            }
+            printf("analyseData - Paket 1 + Paket 2 \n");
         }
+#endif
 
         // wir haben genug und verarbeiten
 
