@@ -31,8 +31,6 @@ void getHeaderInternal(uint8_t data[])
     char mydata[64];
     bool array_match = true;
 
-    //sprintf(mydata, "header %c%c%c 0%c%c", checkCharValue(data[10]), checkCharValue(data[11]), checkCharValue(data[12]), checkCharValue(data[13]), checkCharValue(data[14]));
-
     snprintf(mydata, sizeof(mydata), "header %c%c%c 0%c%c", 
          checkCharValue(data[10]), 
          checkCharValue(data[11]), 
