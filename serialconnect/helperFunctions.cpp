@@ -3,7 +3,7 @@
 #include <string.h>
 #include "helperFunctions.h"
 
-//#define DISPLAY_ONLY_LINE 3
+// #define DISPLAY_ONLY_LINE 3
 
 uint8_t checkDisplayBit(uint8_t displaybit)
 {
@@ -14,10 +14,16 @@ uint8_t checkDisplayBit(uint8_t displaybit)
     return displaybit;
 };
 
-
-uint8_t getNullBit() {
+uint8_t getNullBit()
+{
     return 0x00;
 }
+
+char checkCharValue(char value)
+{
+    char characterToSend = (value == 32 || value == ' ') ? '0' : (char)value;
+    return characterToSend;
+};
 
 uint8_t checkBitValue(uint8_t data)
 {
@@ -29,12 +35,11 @@ uint8_t checkBitValue(uint8_t data)
     }
     */
 
-    //lane 10 - switch to decimal lt
+    // lane 10 - switch to decimal lt
     if (data > 10)
     {
         return 0x00;
     }
-
 
     return data;
 };
@@ -61,4 +66,3 @@ void showDisplayLine(uint8_t *data[])
 {
     showDisplayInternal(*data);
 }
-

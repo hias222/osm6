@@ -134,6 +134,9 @@ int putReadData(uint8_t ReadData)
             part1_exist = 1;
             part2_exist = 0;
             memcpy(paket1, &buf[0], in_count);
+
+            getHeader(paket1);
+
             if (verbose)
             {
                 printf("\n");
@@ -161,14 +164,14 @@ int putReadData(uint8_t ReadData)
         // wir haben genug und verarbeiten
 
         // please check number lanes in colorado config !!!!!!!!!
-        //  analyseActiveData(colorado_control_channel, &colorado_data[colorado_control_channel]);
+        // analyseActiveData(colorado_control_channel, &colorado_data[colorado_control_channel]);
         // checkStartStop(&colorado_data[colorado_control_channel]);
 
         // wir analsieren die zeit um unötiges schicken zu vermeiden
         // getTime(&colorado_data[colorado_control_channel]);
 
         //
-        getHeader(&colorado_data[colorado_control_channel]);
+        // getHeader(&colorado_data[colorado_control_channel]);
 
         // storeRounds(&colorado_data[colorado_control_channel]);
     }
@@ -188,24 +191,3 @@ int putReadData(uint8_t ReadData)
 
     return true;
 }
-
-/*
-int outPutBuffer(int code, uint8_t data[])
-{
-    char mydata[64];
-
-    printf("raw Buffer ");
-    printf("%02x: ", code);
-    for (int i = 0; i < BUFFER_LENGTH; i++)
-    {
-        //printf("%02x %d ", data[i], data[i]);
-        printf("%02x ", data[i]);
-    }
-    printf("\n");
-        sprintf(mydata, "channel: %d: 2: %d 4: %d 6: %d 8: %d 10: %d 12: %d 14: %d", code, checkBitValue(data[2]), checkBitValue(data[4]),
-            checkBitValue(data[6]), checkBitValue(data[8]), checkBitValue(data[10]), checkBitValue(data[12]), checkBitValue(data[14]));
-    printf("%s \n", mydata);
-
-    return 0;
-}
-*/

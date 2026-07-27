@@ -8,7 +8,7 @@
 #include "analyseLane.h"
 #include "analyseRunningTime.h"
 
-// #define debug
+#define debug
 
 char *COLORADO_HEADER_DATA;
 
@@ -31,7 +31,18 @@ void getHeaderInternal(uint8_t data[])
     char mydata[64];
     bool array_match = true;
 
-    sprintf(mydata, "header %d%d%d %d%d%d", checkBitValue(data[0]), checkBitValue(data[2]), checkBitValue(data[4]), checkBitValue(data[10]), checkBitValue(data[12]), checkBitValue(data[14]));
+    //sprintf(mydata, "header %c%c%c 0%c%c", checkCharValue(data[10]), checkCharValue(data[11]), checkCharValue(data[12]), checkCharValue(data[13]), checkCharValue(data[14]));
+
+    snprintf(mydata, sizeof(mydata), "header %c%c%c 0%c%c", 
+         checkCharValue(data[10]), 
+         checkCharValue(data[11]), 
+         checkCharValue(data[12]), 
+         checkCharValue(data[13]), 
+         checkCharValue(data[14]));
+
+#ifdef debug
+    printf("getHeaderData: %s\n", mydata);
+#endif
 
     if (strcmp(mydata, "header 000 000") == 0)
     {
@@ -50,7 +61,7 @@ void getHeaderInternal(uint8_t data[])
         // danach kann erstmal einige sekunden nichts kommen
         // die colorado schickt aber einen Reset mit daten
         // es entsteht datenmuell
-        setsendActiveStateOff();
+        // setsendActiveStateOff();
 
         // TODO clean Lane Data
         // nein es werden immer alle Zeiten bis zum erbrechen geschickt ...
@@ -67,12 +78,12 @@ void getHeaderInternal(uint8_t data[])
     }
 }
 
-void getHeader(uint8_t *data[])
+void getHeader(uint8_t data[])
 {
 #ifdef debug
-    printf("getHeader - start\n");
+    printf("\ngetHeader - start\n");
 #endif
-    getHeaderInternal(*data);
+    getHeaderInternal(data);
 #ifdef debug
     printf("getHeader - end\n");
 #endif
