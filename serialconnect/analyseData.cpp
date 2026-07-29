@@ -10,7 +10,7 @@
 #include "analyseRunningTime.h"
 #include "analyseLane.h"
 
-//#define debug
+// #define debug
 
 // #define debug_lane_pointer
 
@@ -104,8 +104,6 @@ int putReadData(uint8_t ReadData)
         osm6_start_detected = 0x01;
         osm6_end_detected = 0x00;
         buf[0] = ReadData;
-        // colorado_control_bit = buf[0] & 0x01;
-        // colorado_control_channel = (~(buf[0] >> 1)) & 0x1F;
     }
     else if (ReadData == EOT)
     {
@@ -123,7 +121,6 @@ int putReadData(uint8_t ReadData)
 #ifdef debug
             printf("analyseData - Paket 2 \n");
 #endif
-
         }
         else if (buf[1] == STX && buf[2] == HOME)
         {
@@ -148,12 +145,14 @@ int putReadData(uint8_t ReadData)
 #endif
         }
 
-#ifdef debug
-        if (part2_exist == 1)
+        if (part2_exist == 1 && part1_exist == 1)
         {
+#ifdef debug
             printf("analyseData - Paket 1 + Paket 2 \n");
-        }
 #endif
+            part1_exist = 0;
+            part2_exist = 0;
+        }
 
         // wir haben genug und verarbeiten
 
