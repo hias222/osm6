@@ -10,7 +10,7 @@
 #include "analyseRunningTime.h"
 #include "analyseLane.h"
 
-// #define debug
+//#define debug
 
 // #define debug_lane_pointer
 
@@ -131,6 +131,7 @@ int putReadData(uint8_t ReadData)
             part2_exist = 0;
             memcpy(paket1, &buf[0], in_count);
 
+            checkStartStop(paket1);
             getHeader(paket1);
 
 #ifdef debug

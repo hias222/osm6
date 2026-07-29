@@ -7,71 +7,93 @@
 #include "helperFunctions.h"
 #include "analyseLane.h"
 
-//#define debug
+// #define debug
 
 int noworking;
 bool pending, running;
 
 bool b_running, b_stopping;
 
-bool checknotnull(uint8_t data[])
+bool checkStartSignal(uint8_t data[])
 {
 
-    // nur jedes 5 mal
-    noworking++;
-    if (noworking > 5 || !pending)
-    {
+#ifdef debug
+    char mydata[64];
+
+    snprintf(mydata, sizeof(mydata), "3: %c 4: %c 5: %c 6:%c 7: %c", 
+         checkCharValue(data[3]), 
+         checkCharValue(data[4]), 
+         checkCharValue(data[5]), 
+         checkCharValue(data[6]), 
+         checkCharValue(data[7]));
+    printf("getHeaderData: %s\n", mydata);
+#endif
+
+    char myonlinetime[2];
+    char mystart[2];
+
+    snprintf(mystart, sizeof(mystart), "%c", checkCharValue(data[4]));
+    snprintf(myonlinetime, sizeof(myonlinetime), "%c", checkCharValue(data[3]));
 
 #ifdef debug
-        printf("time %d \n", pending);
+    printf("CheckStart %s %s\n", mystart, myonlinetime);
 #endif
-        noworking = 0;
-        for (int i = 12; i > 4; i = i - 2)
-        {
-            if (data[i] != 0x0F)
-            {
-                if (data[i] > 0)
-                {
-                    pending = true;
-                    return true;
-                }
-            }
-        }
-        pending = false;
+
+    if (strcmp(mystart, "S") != 0)
+    {
         return false;
     }
-    return pending;
+
+    if (strcmp(myonlinetime, "2") != 0)
+    {
+        return false;
+    }
+
+    return true;
+};
+
+bool checkStopSignal(uint8_t data[])
+{
+    char myonlinetime[2];
+
+    snprintf(myonlinetime, sizeof(myonlinetime), "%c", checkCharValue(data[3]));
+
+#ifdef debug
+    printf("CheckStop %s\n", myonlinetime);
+#endif
+
+    if (strcmp(myonlinetime, "1") != 0)
+    {
+        return false;
+    }
+
+    return true;
 };
 
 void checkStartStopInternal(uint8_t data[])
 {
-    b_running = checknotnull(data);
-    char mydata[MQTT_LONG_LENGTH];
-
-    if (b_stopping != b_running)
+    b_running = checkStartSignal(data);
+    
+    if (b_running)
     {
-        resetAllData();
-        if (b_running)
-        {
-            sprintf(mydata, "start");
-            mqtt_send(mydata);
-        }
-        else
-        {
-            sprintf(mydata, "stop");
-            mqtt_send(mydata);
-        }
+        char mydata[MQTT_LONG_LENGTH];
+        sprintf(mydata, "start");
+        mqtt_send(mydata);
+        printf("----> start\n");
     }
-    b_stopping = b_running;
+
+    b_stopping = checkStopSignal(data);
+
+    if (b_stopping)
+    {
+        char mydata[MQTT_LONG_LENGTH];
+        sprintf(mydata, "stop");
+        mqtt_send(mydata);
+        printf("---> stop\n");
+    }
 };
 
-void checkStartStop(uint8_t *data[])
+void checkStartStop(uint8_t data[])
 {
-#ifdef debug
-    printf("checkStartStop - start\n");
-#endif
-    checkStartStopInternal(*data);
-#ifdef debug
-    printf("checkStartStop - end\n");
-#endif
+    checkStartStopInternal(data);
 }
