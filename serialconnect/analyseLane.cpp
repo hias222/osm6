@@ -51,7 +51,7 @@ void getLaneTime(uint8_t part1[], uint8_t part2[])
                  checkCharValue(part2[15]),
                  checkCharValue(part2[17]),
                  checkCharValue(part2[18]),
-                 checkCharValue(part1[17]),
+                 checkCharValueNoNull(part1[17]),
                  checkCharValue(part1[18]));
 #ifdef debug
         printf("Endzeit %s -> %s \n", mydata, mykind);

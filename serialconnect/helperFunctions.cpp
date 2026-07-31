@@ -25,8 +25,14 @@ char checkCharValue(char value)
     return characterToSend;
 };
 
-uint8_t checkBitValue(uint8_t data)
+char checkCharValueNoNull(char value)
 {
+    char characterToSend = (value == 32 || value == ' ' || value == 48) ? ' ' : (char)value;
+    return characterToSend;
+};
+
+uint8_t checkBitValue(uint8_t data)
+{ 
     // history empty
     /*
     if (data == 0x0F)
