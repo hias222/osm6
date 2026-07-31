@@ -77,7 +77,7 @@ void checkStartStopInternal(uint8_t data[])
     if (b_running)
     {
         char mydata[MQTT_LONG_LENGTH];
-        sprintf(mydata, "start");
+        snprintf(mydata, sizeof(mydata), "start");
         mqtt_send(mydata);
         printf("----> start\n");
     }
@@ -87,7 +87,7 @@ void checkStartStopInternal(uint8_t data[])
     if (b_stopping)
     {
         char mydata[MQTT_LONG_LENGTH];
-        sprintf(mydata, "stop");
+        snprintf(mydata, sizeof(mydata), "stop");
         mqtt_send(mydata);
         printf("---> stop\n");
     }

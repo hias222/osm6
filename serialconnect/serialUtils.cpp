@@ -72,7 +72,7 @@ void storeRoundsInternal(uint8_t data[])
     char sendData[MQTT_LONG_LENGTH];
     bool array_match = true;
 
-    sprintf(mydata, "%d%d%d%d%d%d%d%d", checkBitValue(data[0]), checkBitValue(data[2]), checkBitValue(data[4]),
+    snprintf(mydata, sizeof(mydata), "%d%d%d%d%d%d%d%d", checkBitValue(data[0]), checkBitValue(data[2]), checkBitValue(data[4]),
             checkBitValue(data[6]), checkBitValue(data[8]), checkBitValue(data[10]),
             checkBitValue(data[12]), checkBitValue(data[14]));
     // printf("showDisplayLine\n");
@@ -93,7 +93,7 @@ void storeRoundsInternal(uint8_t data[])
         if (strcmp(mydata, storeRoundsData) != 0)
         {
             strcpy(storeRoundsData, mydata);
-            sprintf(sendData, "round %d", p_round);
+            snprintf(sendData, sizeof(sendData), "round %d", p_round);
             mqtt_send(sendData);
         }
     }
@@ -105,7 +105,7 @@ void storeRoundsInternal(uint8_t data[])
         printf("round-2 %d \n", p_round);
 #endif
         strcpy(storeRoundsData, mydata);
-        sprintf(sendData, "round %d", p_round);
+        snprintf(sendData, sizeof(sendData), "round %d", p_round);
         mqtt_send(sendData);
     }
 }

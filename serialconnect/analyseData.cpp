@@ -77,7 +77,6 @@ int initReadData()
 
     initanalyseData();
     initRunninTime();
-    initanalyseLane(DISPLAY_LANE_COUNT, MQTT_MESSAGE_LENGTH);
     initanalyseHeader(MQTT_LONG_LENGTH);
 #ifdef debug
     printf("analyseData - INIT reaady\n");
@@ -88,7 +87,6 @@ int initReadData()
 int cleanReadData()
 {
     cleananalyseData();
-    cleananalyseLane();
     free(colorado_data);
     return 0;
 }
@@ -147,6 +145,7 @@ int putReadData(uint8_t ReadData)
 
         if (part2_exist == 1 && part1_exist == 1)
         {
+            analyseActiveData(paket1, paket2);
 #ifdef debug
             printf("analyseData - Paket 1 + Paket 2 \n");
 #endif
@@ -156,17 +155,9 @@ int putReadData(uint8_t ReadData)
 
         // wir haben genug und verarbeiten
 
-        // please check number lanes in colorado config !!!!!!!!!
-        // analyseActiveData(colorado_control_channel, &colorado_data[colorado_control_channel]);
-        // checkStartStop(&colorado_data[colorado_control_channel]);
-
         // wir analsieren die zeit um unötiges schicken zu vermeiden
         // getTime(&colorado_data[colorado_control_channel]);
-
-        //
-        // getHeader(&colorado_data[colorado_control_channel]);
-
-        // storeRounds(&colorado_data[colorado_control_channel]);
+        //storeRounds(&colorado_data[colorado_control_channel]);
     }
     else
     {

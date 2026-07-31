@@ -44,7 +44,7 @@ void getHeaderInternal(uint8_t data[])
 
     if (strcmp(mydata, "header 000 000") == 0)
     {
-        sprintf(mydata, "clock");
+        snprintf(mydata, sizeof(mydata), "clock");
     }
     else if (strcmp(mydata, COLORADO_HEADER_DATA) == 0)
     {
@@ -63,11 +63,14 @@ void getHeaderInternal(uint8_t data[])
 
         // TODO clean Lane Data
         // nein es werden immer alle Zeiten bis zum erbrechen geschickt ...
-        resetAllData();
     }
 
     if (!array_match)
     {
+
+#ifdef debug
+    printf("Send Header: %s\n", mydata);
+#endif
         mqtt_send(mydata);
         for (int i = 0; i < mqttLongLength; i++)
         {

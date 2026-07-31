@@ -53,7 +53,7 @@ void showDisplayInternal(uint8_t data[])
     {
 #endif
 
-        sprintf(mydata, "-> %d-%d-%d-%d-%d-%d-%d-%d", checkBitValue(data[0]), checkBitValue(data[2]), checkBitValue(data[4]),
+        snprintf(mydata, sizeof(mydata), "-> %d-%d-%d-%d-%d-%d-%d-%d", checkBitValue(data[0]), checkBitValue(data[2]), checkBitValue(data[4]),
                 checkBitValue(data[6]), checkBitValue(data[8]), checkBitValue(data[10]),
                 checkBitValue(data[12]), checkBitValue(data[14]));
         printf("%s\n", mydata);

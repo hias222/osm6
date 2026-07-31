@@ -86,7 +86,7 @@ char *see_speed(speed_t speed)
         strcpy(SPEED, "B38400");
         break;
     default:
-        sprintf(SPEED, "unknown (%d)", (int)speed);
+        snprintf(SPEED, sizeof(SPEED), "unknown (%d)", (int)speed);
     }
     return SPEED;
 }
