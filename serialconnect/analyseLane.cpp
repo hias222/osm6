@@ -43,7 +43,7 @@ void getLaneTime(uint8_t part1[], uint8_t part2[])
 
     if (strcmp(mykind, "A") == 0)
     {
-        snprintf(mydata, sizeof(mydata), "lane %c %c%c:%c%c:%c%c %c%c",
+        snprintf(mydata, sizeof(mydata), "lane %c %c%c:%c%c,%c%c %c%c",
                  checkCharValue(part2[4]),
                  checkCharValue(part2[11]),
                  checkCharValue(part2[12]),
@@ -62,7 +62,7 @@ void getLaneTime(uint8_t part1[], uint8_t part2[])
 
     if (strcmp(mykind, "R") == 0)
     {
-        snprintf(mydata, sizeof(mydata), "reaction %c %c%c:%c%c",
+        snprintf(mydata, sizeof(mydata), "reaction %c %c%c,%c%c",
                  checkCharValue(part2[4]),
                  checkCharValue(part2[14]),
                  checkCharValue(part2[15]),
