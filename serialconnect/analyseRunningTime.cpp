@@ -87,7 +87,7 @@ void getTimeInternal(uint8_t data[])
         // einmal warten zum reset
         headerChange = false;
 
-        sprintf(mydata, "time %d%d:%d%d,%d", checkBitValue(data[4]), checkBitValue(data[6]),
+        snprintf(mydata, sizeof(mydata), "time %d%d:%d%d,%d", checkBitValue(data[4]), checkBitValue(data[6]),
                 checkBitValue(data[8]), checkBitValue(data[10]), checkBitValue(data[12]));
 
         mqtt_send(mydata);

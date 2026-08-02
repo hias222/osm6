@@ -7,7 +7,7 @@
 #include "helperFunctions.h"
 #include "analyseRunningTime.h"
 
-// #define debug
+#define debug
 
 #ifdef _WIN32
 #include <process.h>
@@ -43,7 +43,10 @@ void getLaneTime(uint8_t part1[], uint8_t part2[])
 
     if (strcmp(mykind, "A") == 0)
     {
-        snprintf(mydata, sizeof(mydata), "lane %c %c%c:%c%c,%c%c %c%c",
+        char returnString[4];
+        checkCharValueNoNull(part1[17], part1[18], returnString);
+
+        snprintf(mydata, sizeof(mydata), "lane %c %c%c:%c%c,%c%c %s",
                  checkCharValue(part2[4]),
                  checkCharValue(part2[11]),
                  checkCharValue(part2[12]),
@@ -51,8 +54,7 @@ void getLaneTime(uint8_t part1[], uint8_t part2[])
                  checkCharValue(part2[15]),
                  checkCharValue(part2[17]),
                  checkCharValue(part2[18]),
-                 checkCharValueNoNull(part1[17]),
-                 checkCharValue(part1[18]));
+                 returnString);
 #ifdef debug
         printf("Endzeit %s -> %s \n", mydata, mykind);
 #endif

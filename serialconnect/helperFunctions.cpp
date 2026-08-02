@@ -21,14 +21,24 @@ uint8_t getNullBit()
 
 char checkCharValue(char value)
 {
-    char characterToSend = (value == 32 || value == ' ') ? '0' : (char)value;
+    char characterToSend = (value == 32 || value == 48) ? '0' : (char)value;
     return characterToSend;
 };
 
-char checkCharValueNoNull(char value)
+void checkCharValueNoNull(char value1, char value2, char *returnString)
 {
-    char characterToSend = (value == 32 || value == ' ' || value == 48) ? ' ' : (char)value;
-    return characterToSend;
+    char mydata[4];
+    // kein führendes Leerzeichen, wenn der erste Wert 0 ist, dann nur den zweiten Wert zurückgeben
+    if (value1 == 32 || value1 == 48)
+    {
+        snprintf(mydata, sizeof(mydata), "%c", value2);
+    }
+    else
+    {
+        snprintf(mydata, sizeof(mydata), "%c%c", value1, value2);
+    }
+
+    strcpy(returnString, mydata);
 };
 
 uint8_t checkBitValue(uint8_t data)
