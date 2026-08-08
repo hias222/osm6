@@ -7,7 +7,7 @@
 #include "helperFunctions.h"
 #include "analyseRunningTime.h"
 
-#define debug
+// #define debug
 
 #ifdef _WIN32
 #include <process.h>

@@ -1,6 +1,7 @@
 #include <string>
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 #include "mosquitto.h"
 #include "serialUtils.h"
 #include "mqttUtils.h"
@@ -20,12 +21,12 @@ bool checkStartSignal(uint8_t data[])
 #ifdef debug
     char mydata[64];
 
-    snprintf(mydata, sizeof(mydata), "3: %c 4: %c 5: %c 6:%c 7: %c", 
-         checkCharValue(data[3]), 
-         checkCharValue(data[4]), 
-         checkCharValue(data[5]), 
-         checkCharValue(data[6]), 
-         checkCharValue(data[7]));
+    snprintf(mydata, sizeof(mydata), "3: %c 4: %c 5: %c 6:%c 7: %c",
+             checkCharValue(data[3]),
+             checkCharValue(data[4]),
+             checkCharValue(data[5]),
+             checkCharValue(data[6]),
+             checkCharValue(data[7]));
     printf("getHeaderData: %s\n", mydata);
 #endif
 
@@ -70,16 +71,24 @@ bool checkStopSignal(uint8_t data[])
     return true;
 };
 
-void checkStartStopInternal(uint8_t data[])
+void checkStartStopInternal(uint8_t data[], bool *result, struct tm *zeitstempel)
 {
     b_running = checkStartSignal(data);
-    
+
     if (b_running)
     {
         char mydata[MQTT_LONG_LENGTH];
         snprintf(mydata, sizeof(mydata), "start");
         mqtt_send(mydata);
         printf("----> start\n");
+        *result = true;
+
+        time_t t = time(NULL);
+        struct tm *lokalerZeiger = localtime(&t);
+        if (lokalerZeiger != NULL)
+        {
+            *zeitstempel = *lokalerZeiger; // Kopiert die Zeitdaten in unsere Variable
+        }
     }
 
     b_stopping = checkStopSignal(data);
@@ -90,10 +99,12 @@ void checkStartStopInternal(uint8_t data[])
         snprintf(mydata, sizeof(mydata), "stop");
         mqtt_send(mydata);
         printf("---> stop\n");
+        *result = false;
     }
 };
 
-void checkStartStop(uint8_t data[])
+void checkStartStop(uint8_t data[], bool *result, struct tm *zeitstempel)
 {
-    checkStartStopInternal(data);
+    // printf("check Start/Stop\n");
+    checkStartStopInternal(data, result, zeitstempel);
 }

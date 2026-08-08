@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <time.h>
+
 #include "analyseData.h"
 #include "serialUtils.h"
 #include "helperFunctions.h"
@@ -40,6 +42,9 @@ uint8_t colorado_control_bit;
 uint8_t in_count;
 uint8_t colorado_digit_no;
 
+bool isStarted = false;
+struct tm aktuelleUhrzeit;
+
 #define SOH 0x01
 #define STX 0x02
 #define HOME 0x08
@@ -75,8 +80,16 @@ int initReadData()
 
     // more inits
 
+    time_t t = time(NULL);
+    struct tm *lokalerZeiger = localtime(&t);
+    if (lokalerZeiger != NULL)
+    {
+        aktuelleUhrzeit = *lokalerZeiger; // Kopiert die Zeitdaten in unsere Variable
+    }
+
+    // da gehts um runden Anzeige und speicherns
     initanalyseData();
-    initRunninTime();
+    // brauchen wir auch für omega store header
     initanalyseHeader(MQTT_LONG_LENGTH);
 #ifdef debug
     printf("analyseData - INIT reaady\n");
@@ -126,17 +139,35 @@ int putReadData(uint8_t ReadData)
             part2_exist = 0;
             memcpy(paket1, &buf[0], in_count);
 
-            checkStartStop(paket1);
+            checkStartStop(paket1, &isStarted, &aktuelleUhrzeit);
             getHeader(paket1);
 
 #ifdef debug
             printf("analyseData - Paket 1 \n");
 #endif
         }
+        else if (buf[1] == DC2 && buf[3] == DC4)
+        {
+            if (isStarted)
+            {
+#ifdef debug
+                printf("Ping %02d:%02d:%02d Uhr\n",
+                       aktuelleUhrzeit.tm_hour,
+                       aktuelleUhrzeit.tm_min,
+                       aktuelleUhrzeit.tm_sec);
+#endif
+                sendPingTime(&aktuelleUhrzeit);
+            }
+#ifdef debug
+            else
+            {
+                printf("analyseData - Ping but not started \n");
+            }
+#endif
+        }
         else
         {
-
-            printf("todo - ping \n");
+            printf("Error MESSAGE\n");
 
 #ifdef debug
             printf("analyseData - Error \n");
@@ -157,7 +188,7 @@ int putReadData(uint8_t ReadData)
 
         // wir analsieren die zeit um unötiges schicken zu vermeiden
         // getTime(&colorado_data[colorado_control_channel]);
-        //storeRounds(&colorado_data[colorado_control_channel]);
+        // storeRounds(&colorado_data[colorado_control_channel]);
     }
     else
     {

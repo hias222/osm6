@@ -6,7 +6,7 @@
 #include "mqttUtils.h"
 #include "helperFunctions.h"
 
-// #define debug
+#define debug
 
 // 100/s
 //  -> 10s
@@ -19,7 +19,15 @@ int loopcount;
 bool sendActiveState;
 bool headerChange;
 
-void initRunninTime()
+void startRunninTime()
+{
+    // hundredth = 0;
+    loopcount = 0;
+    sendActiveState = false;
+    headerChange = false;
+}
+
+void stopRunningTime()
 {
     // hundredth = 0;
     loopcount = 0;
@@ -68,37 +76,17 @@ int timehundredth(uint8_t data[])
     return timehundredth;
 }
 
-void getTimeInternal(uint8_t data[])
+void getTimeInternal(struct tm *zeitstempel)
 {
     char mydata[64];
     // running = checknotnull(data);
     //  wir bauen bei laufwechsel das mit ein
     //  laufwechsel wird ausgeschaltet
     // hundredth = timehundredth(data);
+    //
 
-    if (loopcount > SEND_TIME_EVERY_COUNTS)
-    {
-
-        if (!headerChange)
-        {
-            // setzen active state
-            timehundredth(data);
-        }
-        // einmal warten zum reset
-        headerChange = false;
-
-        snprintf(mydata, sizeof(mydata), "time %d%d:%d%d,%d", checkBitValue(data[4]), checkBitValue(data[6]),
-                checkBitValue(data[8]), checkBitValue(data[10]), checkBitValue(data[12]));
-
-        mqtt_send(mydata);
-        loopcount = 0;
-    }
-    loopcount++;
-};
-
-void getTime(uint8_t *data[])
-{
-    getTimeInternal(*data);
+    // snprintf(mydata, sizeof(mydata), "time %d%d:%d%d,%d", checkBitValue(data[4]), checkBitValue(data[6]),
+    //         checkBitValue(data[8]), checkBitValue(data[10]), checkBitValue(data[12]));
 };
 
 bool getsendActiveState()
@@ -118,3 +106,21 @@ void setsendActiveStateOff()
     }
 #endif
 }
+
+void sendPingTime(struct tm *zeitstempel)
+{
+#ifdef debug
+    printf("Stored Time %02d:%02d:%02d Uhr\n",
+           zeitstempel->tm_hour,
+           zeitstempel->tm_min,
+           zeitstempel->tm_sec);
+#endif
+    getTimeInternal(zeitstempel);
+
+#ifdef debug
+    printf("Stored Time End %02d:%02d:%02d Uhr\n",
+           zeitstempel->tm_hour,
+           zeitstempel->tm_min,
+           zeitstempel->tm_sec);
+#endif
+};
