@@ -80,15 +80,55 @@ int timehundredth(uint8_t data[])
 
 void getTimeInternal(struct tm *zeitstempel)
 {
-    char mydata[64];
-    // running = checknotnull(data);
-    //  wir bauen bei laufwechsel das mit ein
-    //  laufwechsel wird ausgeschaltet
-    // hundredth = timehundredth(data);
-    //
 
-    // snprintf(mydata, sizeof(mydata), "time %d%d:%d%d,%d", checkBitValue(data[4]), checkBitValue(data[6]),
-    //         checkBitValue(data[8]), checkBitValue(data[10]), checkBitValue(data[12]));
+#ifdef debug
+    printf("Analyse Time End %02d:%02d:%02d Uhr\n",
+           zeitstempel->tm_hour,
+           zeitstempel->tm_min,
+           zeitstempel->tm_sec);
+#endif
+
+    if (zeitstempel == NULL)
+        return;
+
+    // 1. Aktuelle Systemzeit holen
+    time_t aktuelleZeit_t = time(NULL);
+
+    // 2. Gespeicherte Zeit in time_t umwandeln
+    struct tm tempGespeichert = *zeitstempel;
+    time_t gespeicherteZeit_t = mktime(&tempGespeichert);
+
+    if (gespeicherteZeit_t == (time_t)-1)
+    {
+        printf("Fehler bei der Zeitumwandlung!\n");
+        return;
+    }
+
+    // 3. Differenz berechnen (Ergebnis ist ein double)
+    double differenzInSekunden = difftime(aktuelleZeit_t, gespeicherteZeit_t);
+
+    // In Ganzzahl umwandeln (negative Werte abfangen)
+    long gesamtSekunden = (long)differenzInSekunden;
+    if (gesamtSekunden < 0)
+        gesamtSekunden = 0;
+
+    // 3. Mathematische Aufteilung in Stunden, Minuten und Sekunden
+    long stunden = gesamtSekunden / 3600;
+    long minuten = (gesamtSekunden % 3600) / 60;
+    long sekunden = gesamtSekunden % 60;
+
+    // 4. Formatierte Ausgabe mit printf
+    // %02ld sorgt für führende Nullen bei 2-stelligen Ganzzahlen (z.B. 05 statt 5)
+    printf("Vergangene Zeit: %02ld:%02ld:%02ld\n", stunden, minuten, sekunden);
+
+    char mydata[64];
+    snprintf(mydata, sizeof(mydata), "time %02ld:%02ld,0", minuten, sekunden);
+    
+#ifdef debug
+    printf("Debug: %s\n", mydata);
+#endif
+    
+    mqtt_send(mydata);
 };
 
 bool getsendActiveState()
@@ -111,12 +151,6 @@ void setsendActiveStateOff()
 
 void sendPingTime(struct tm *zeitstempel)
 {
-#ifdef debug
-    printf("Stored Time %02d:%02d:%02d Uhr\n",
-           zeitstempel->tm_hour,
-           zeitstempel->tm_min,
-           zeitstempel->tm_sec);
-#endif
     getTimeInternal(zeitstempel);
 
 #ifdef debug
