@@ -67,15 +67,15 @@ int mqtt_send(char message[MQTT_LONG_LENGTH])
         {
             error_state = false;
             printf("Reconnect \n");
-            mosquitto_reconnect(mosq);
+            // mosquitto_reconnect(mosq);
+            mosquitto_destroy(mosq);
         }
 
         rc = mosquitto_connect(mosq, mqtt_host, mqtt_port, 60);
 
         if (rc)
         {
-            printf("mosquitto_connect \n");
-            printf("Error: %s\n", mosquitto_strerror(rc));
+            printf("Error Connect: %s\n", mosquitto_strerror(rc));
             error_state = true;
             free(remotechar);
             return rc;
@@ -91,7 +91,7 @@ int mqtt_send(char message[MQTT_LONG_LENGTH])
 
         if (rc)
         {
-            printf("Error: %s\n", mosquitto_strerror(rc));
+            printf("Error Publish: %s\n", mosquitto_strerror(rc));
             error_state = true;
             free(remotechar);
             return rc;
