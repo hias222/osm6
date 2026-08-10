@@ -8,7 +8,7 @@
 
 #include <time.h>
 
-#define debug
+// #define debug
 
 // 100/s
 //  -> 10s
